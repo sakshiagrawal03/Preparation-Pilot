@@ -128,39 +128,45 @@
 // }
 
 // module.exports={generateInterviewReportController, getInterviewReportByIdController, getAllInterviewReportsController, generateResumePdfController, deleteInterviewReportController}
-const pdf = require('pdf-parse'); 
+
+
 const { generateInterviewReport, generateResumePdf } = require('../services/ai.service');
 const interviewReportModel = require('../models/interviewReport.model');
 
 /**
  * Helper function to extract text from PDF Buffer.
- * This is designed to be Vercel-safe and Local-friendly.
+ * Optimized for pdf-parse v2.4.5 and Vercel Serverless environment.
  */
 async function getPdfText(buffer) {
-    let options = {};
+    // 1. Polyfill browser globals for Vercel using the built-in worker
+    require('pdf-parse/worker'); 
     
-    // Vercel/Production check to bypass DOMMatrix/Canvas errors
-    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-        options = {
-            pagerender: function(pageData) {
-                return pageData.getTextContent()
-                    .then(function(textContent) {
-                        return textContent.items.map(item => item.str).join(' ');
-                    });
-            }
-        };
-    }
+    // 2. Lazy load the Class and Factory
+    const { PDFParse, CanvasFactory } = require('pdf-parse');
 
-    // Handle library export variations (CommonJS vs ES Modules)
-    const parse = typeof pdf === 'function' ? pdf : pdf.default;
-    
-    // Extract and return data
-    const data = await parse(buffer, options);
-    return data.text;
+    try {
+        // 3. Initialize the Class-based parser (v2.x syntax)
+        // We pass CanvasFactory as a placeholder to satisfy internal checks
+        const parser = new PDFParse({ 
+            data: new Uint8Array(buffer), 
+            CanvasFactory 
+        });
+
+        // 4. Extract text content
+        const result = await parser.getText();
+        
+        // 5. Cleanup to prevent Vercel memory leaks
+        await parser.destroy();
+        
+        return result.text;
+    } catch (error) {
+        console.error("PDF v2.4.5 Parser Internal Error:", error);
+        throw new Error("Failed to extract text from PDF.");
+    }
 }
 
 /**
- * @desc Generates an interview report based on resume, self-description, and job description
+ * @desc Generates an interview report
  **/
 async function generateInterviewReportController(req, res) {
     try {
@@ -168,7 +174,7 @@ async function generateInterviewReportController(req, res) {
             return res.status(400).json({ message: "Resume file is required" });
         }
 
-        // Use the helper instead of the broken 'new pdfParse.PDFParse' syntax
+        // Extract text using our Vercel-safe helper
         const resumeText = await getPdfText(req.file.buffer);
         const { selfDescription, jobDescription } = req.body;
 
