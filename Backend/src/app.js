@@ -10,6 +10,9 @@ app.use(cookieParser());
 //      origin: process.env.FRONTEND_URL ,
 //      credentials: true
 // }));
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "Prep Pilot Backend is Live!" });
+});
 app.use(cors({
     origin: [
         "http://localhost:5173", 
