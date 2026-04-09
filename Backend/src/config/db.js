@@ -14,32 +14,26 @@
 // module.exports= connectToDB;
 const mongoose = require('mongoose');
 
-let isConnected = false; 
+let isConnected = false;
 
-async function connectToDB() {
-    // Check if we already have a connection (readyState 1 = connected)
-    if (mongoose.connection.readyState === 1) {
-        console.log('Using existing database connection');
+const connectToDB = async () => {
+    // 1. Disable buffering so it throws an immediate error instead of waiting 10s
+    mongoose.set('bufferCommands', false);
+
+    if (isConnected) {
         return;
     }
 
     try {
-        if (!process.env.MONGO_URI) {
-            throw new Error('MONGO_URI is missing from Environment Variables');
-        }
-
-        // Configuration to help Vercel avoid timeouts
-        const options = {
-            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-            socketTimeoutMS: 45000,         // Close sockets after 45s
-        };
-
-        await mongoose.connect(process.env.MONGO_URI, options);
-        console.log('Connected to Database');
+        const db = await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 5000, // Fail fast if no connection in 5s
+        });
+        isConnected = db.connections[0].readyState;
+        console.log("Connected to Database");
     } catch (err) {
-        console.error('Error connecting to Database:', err.message);
-        throw err; 
+        console.error("Database Connection Error:", err.message);
+        // Do not throw here, let the app handle it
     }
-}
+};
 
 module.exports = connectToDB;
