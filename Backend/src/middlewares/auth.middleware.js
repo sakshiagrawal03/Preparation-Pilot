@@ -1,7 +1,9 @@
+const connectToDB = require('../config/db'); // Import your db config
 const jwt=require('jsonwebtoken')
 const tokenBlacklistModel= require('../models/blacklist.model');
 
 async function authUser(req,res,next){
+       await connectToDB();
      const token=req.cookies.token;
      if(!token){
             return res.status(401).json({message:"Token not found"})

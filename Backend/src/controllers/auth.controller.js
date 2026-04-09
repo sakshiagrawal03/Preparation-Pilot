@@ -304,6 +304,7 @@ const cookieOptions = {
 async function registerUserController(req, res) {
     try {
         // DEBUG LOG: See exactly what frontend is sending
+        await connectToDB();
         console.log("Registration Attempt Body:", req.body);
 
         const { username, email, password } = req.body;
