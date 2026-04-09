@@ -18,7 +18,8 @@ app.use(cors({
         "http://localhost:5173", 
         "https://preparation-pilot12.vercel.app" // Added vercel frontend URL
     ],
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
 

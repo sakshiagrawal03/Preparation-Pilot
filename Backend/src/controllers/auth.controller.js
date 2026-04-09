@@ -291,24 +291,21 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const tokenBlacklistModel = require('../models/blacklist.model');
 
-/**
- * Dynamic Cookie Configuration
- * Essential for Vercel (HTTPS) vs Localhost (HTTP)
- */
 const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
 
 const cookieOptions = {
     httpOnly: true,
-    secure: isProduction,           // Must be true for HTTPS on Vercel
-    sameSite: isProduction ? 'none' : 'lax', // Required for cross-site cookies
-    maxAge: 24 * 60 * 60 * 1000,    // 1 day
+    secure: isProduction,           
+    sameSite: isProduction ? 'none' : 'lax', 
+    maxAge: 24 * 60 * 60 * 1000,    
     path: '/'
 };
 
-/** * @name registerUserController
- */
 async function registerUserController(req, res) {
     try {
+        // DEBUG LOG: See exactly what frontend is sending
+        console.log("Registration Attempt Body:", req.body);
+
         const { username, email, password } = req.body;
 
         if (!username || !email || !password) {
@@ -331,6 +328,7 @@ async function registerUserController(req, res) {
             password: hash
         });
 
+        // Payload key is 'id'
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         res.cookie('token', token, cookieOptions);
@@ -344,17 +342,14 @@ async function registerUserController(req, res) {
             }
         });
     } catch (error) {
+        console.error("Register Error:", error);
         res.status(500).json({ message: error.message });
     }
 }
 
-/**
- * @name loginUserController
- */
 async function loginUserController(req, res) {
     try {
         const { email, password } = req.body;
-
         const user = await userModel.findOne({ email });
 
         if (!user) {
@@ -384,34 +379,23 @@ async function loginUserController(req, res) {
     }
 }
 
-/**
- * @name logoutUserController
- */
 async function logoutUserController(req, res) {
     try {
         const token = req.cookies.token;
-
         if (token) {
             await tokenBlacklistModel.create({ token });
         }
-
         res.clearCookie('token', cookieOptions);
-
-        return res.status(200).json({
-            message: 'User logged out successfully'
-        });
-
+        return res.status(200).json({ message: 'User logged out successfully' });
     } catch (err) {
         return res.status(500).json({ message: "Logout failed" });
     }
 }
 
-/**
- * @name getMeController 
- */
 async function getMeController(req, res) {
     try {
-        const user = await userModel.findById(req.user._id);
+        // IMPORTANT: Changed from req.user._id to req.user.id to match JWT payload
+        const user = await userModel.findById(req.user.id); 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -424,6 +408,7 @@ async function getMeController(req, res) {
             }
         });
     } catch (error) {
+        console.error("getMe Error:", error);
         res.status(500).json({ message: error.message });
     }
 }
