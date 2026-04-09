@@ -214,3 +214,125 @@ if (!jsonContent.html) {
 }    
 module.exports = {generateInterviewReport,generateResumePdf}
 
+
+
+
+///  depllooooooooy code
+
+// const Groq = require("groq-sdk");
+// const { z } = require("zod");
+// require('dotenv').config();
+
+// // Logic to switch between standard Puppeteer (Local) and Chromium (Vercel)
+// const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+// const puppeteer = isProduction ? require('puppeteer-core') : require('puppeteer');
+// const chromium = isProduction ? require('@sparticuz/chromium') : null;
+
+// const groq = new Groq({
+//     apiKey: process.env.GROQ_API_KEY
+// });
+
+// async function generateInterviewReport({ resume, jobDescription, selfDescription }) {
+//     try {
+//         const prompt = `
+// You are an expert interviewer.
+// Analyze:
+// RESUME: ${resume}
+// JOB DESCRIPTION: ${jobDescription}
+// CANDIDATE INTRO: ${selfDescription}
+
+// Return ONLY valid JSON:
+// {
+//   "title": "string",
+//   "matchScore": integer (0-100),
+//   "technicalQuestions": [ { "question": "string", "intention": "string", "answer": "string" } ],
+//   "behavioralQuestions": [ { "question": "string", "intention": "string", "answer": "string" } ],
+//   "skillGaps": [ { "skill": "string", "severity": "low | medium | high" } ],
+//   "preparationPlan": [ { "day": number, "focus": "string", "tasks": ["string"] } ]
+// }
+// `;
+
+//         const chatCompletion = await groq.chat.completions.create({
+//             messages: [
+//                 { role: "system", content: "You are a JSON generator. You only output valid JSON. You never talk or explain." },
+//                 { role: "user", content: prompt }
+//             ],
+//             model: "llama-3.3-70b-versatile",
+//             response_format: { type: "json_object" },
+//             temperature: 0.7,
+//         });
+
+//         return JSON.parse(chatCompletion.choices[0].message.content);
+//     } catch (error) {
+//         return { error: "Failed to generate report", details: error.message };
+//     }
+// }
+
+// /**
+//  * Optimized for both Local and Vercel environments
+//  */
+// async function generatePdfFromHtml(htmlContent) {
+//     let browser = null;
+//     try {
+//         if (isProduction) {
+//             // VERCEL CONFIG (This works on the cloud)
+//             browser = await puppeteer.launch({
+//                 args: chromium.args,
+//                 defaultViewport: chromium.defaultViewport,
+//                 executablePath: await chromium.executablePath(),
+//                 headless: chromium.headless,
+//                 ignoreHTTPSErrors: true,
+//             });
+//         } else {
+//             // LOCAL CONFIG (This works on your laptop)
+//             browser = await puppeteer.launch({ 
+//                 headless: "new",
+//                 // This path is standard for Windows. 
+//                 // If you use a Mac, it would be '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+//                 executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
+//             });
+//         }
+
+//         const page = await browser.newPage();
+//         await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+//         const pdfBuffer = await page.pdf({
+//             format: 'A4',
+//             margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
+//             printBackground: true
+//         });
+
+//         return pdfBuffer;
+//     } catch (err) {
+//         console.error("PDF Engine Error:", err);
+//         throw err;
+//     } finally {
+//         if (browser !== null) await browser.close();
+//     }
+// }async function generateResumePdf({ resume, selfDescription, jobDescription }) {
+//     const prompt = `Generate a recruiter-ready professional resume in clean HTML. 
+//     Resume: ${resume} 
+//     Summary: ${selfDescription} 
+//     Target Job: ${jobDescription}
+//     Return ONLY JSON: { "html": "..." }`;
+
+//     try {
+//         const response = await groq.chat.completions.create({
+//             model: "llama-3.3-70b-versatile",
+//             messages: [{ role: "user", content: prompt }],
+//             temperature: 0.7,
+//         });
+
+//         const rawContent = response.choices[0].message.content;
+//         const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+//         if (!jsonMatch) throw new Error("No JSON found");
+
+//         const jsonContent = JSON.parse(jsonMatch[0]);
+//         return await generatePdfFromHtml(jsonContent.html);
+//     } catch (error) {
+//         console.error("Error in generateResumePdf:", error);
+//         throw new Error("Failed to generate resume PDF");
+//     }
+// }
+
+// module.exports = { generateInterviewReport, generateResumePdf };

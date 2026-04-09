@@ -216,47 +216,101 @@ $success: #37d69e;
         }
       }
 
-      .prep-timeline {
-        list-style: none;
+     .prep-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 0;
+  position: relative;
+
+  // The Vertical Line Connector
+  &::before {
+    content: '';
+    position: absolute;
+    left: 18px; // Centers with the dot
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, $accent 0%, $border-color 100%);
+    opacity: 0.3;
+  }
+
+  .prep-step {
+    display: flex;
+    gap: 1.5rem;
+    position: relative;
+    padding-bottom: 2.5rem;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+
+    // The Interactive Dot
+    .prep-indicator {
+      position: relative;
+      z-index: 2;
+      
+      .dot {
+        width: 38px;
+        height: 38px;
+        background: $bg-panel;
+        border: 2px solid $border-color;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $text-muted;
+        font-size: 0.75rem;
+        font-weight: 800;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 0 4px $bg-card; // Creates a gap in the line
+      }
+    }
+
+    .prep-content {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid $border-color;
+      padding: 1.2rem;
+      border-radius: 16px;
+      flex: 1;
+      transition: all 0.3s ease;
+
+      h4 {
+        margin: 0 0 0.5rem 0;
+        color: #fff;
+        font-size: 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      ul {
         margin: 0;
-        padding: 0;
-
-        .prep-step {
-          display: flex;
-          gap: 1rem;
-
-          .prep-badge {
-            min-width: 68px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 999px;
-            padding: 0.35rem 0.7rem;
-            font-weight: 700;
-            text-align: center;
-          }
-
-          .prep-content {
-            h4 {
-              margin: 0;
-              color: #fff;
-              font-size: 1rem;
-            }
-
-            ul {
-              margin: 0.4rem 0 0;
-              padding-left: 1.2rem;
-
-              li {
-                color: $text-muted;
-                margin: 0.25rem 0;
-              }
-            }
-          }
+        padding-left: 1.2rem;
+        li {
+          color: $text-muted;
+          font-size: 0.9rem;
+          margin-bottom: 0.4rem;
         }
       }
     }
 
+    // Interactive Hover/Active States
+    &:hover {
+      .dot {
+        border-color: $accent;
+        color: #fff;
+        box-shadow: 0 0 15px rgba($accent, 0.4), 0 0 0 4px $bg-card;
+        transform: scale(1.1);
+      }
+      .prep-content {
+        background: rgba($accent, 0.04);
+        border-color: rgba($accent, 0.3);
+        transform: translateX(5px);
+      }
+    }
+  }
+  }
+}
     .interview-sidebar {
       background: $bg-panel;
       padding: 1.5rem;

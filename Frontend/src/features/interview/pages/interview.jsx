@@ -5,6 +5,8 @@ import '../style/interview.scss';
 import { useInterview } from "../hooks/useInterview.js"
 import { useParams } from "react-router"
 
+
+
 const Interview = () => {
     const { report, getReportById, loading ,getResumePdf } = useInterview();
     const { interviewId } = useParams();
@@ -12,6 +14,13 @@ const Interview = () => {
     const [expandedTechnical, setExpandedTechnical] = useState([]);
     const [expandedBehavioral, setExpandedBehavioral] = useState([]);
     const [animatedScore, setAnimatedScore] = useState(0);
+
+    const [completedDays, setCompletedDays] = useState([]);
+    const toggleDayComplete = (day) => {
+    setCompletedDays(prev => 
+        prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+};
 
 
    useEffect(() => {
@@ -79,20 +88,38 @@ const Interview = () => {
     };
 
     const renderPreparationPlan = () => (
-        <ol className="prep-timeline">
-            {(report.preparationPlan || []).map((step) => (
-                <li key={step.day} className="prep-step">
-                    <div className="prep-badge">Day {step.day}</div>
+    <div className="prep-timeline">
+        {(report.preparationPlan || []).map((step) => {
+            const isDone = completedDays.includes(step.day);
+            return (
+                <div 
+                    key={step.day} 
+                    className={`prep-step ${isDone ? 'completed' : ''}`}
+                    onClick={() => toggleDayComplete(step.day)}
+                    style={{ cursor: 'pointer' }}
+                >
+                    <div className="prep-indicator">
+                        <div className="dot" style={isDone ? { borderColor: '#37d69e', color: '#37d69e' } : {}}>
+                            {isDone ? '✓' : step.day}
+                        </div>
+                    </div>
+                    
                     <div className="prep-content">
-                        <h4>{step.focus}</h4>
+                        <h4>
+                            {step.focus}
+                            {isDone && <span style={{ fontSize: '0.7rem', color: '#37d69e' }}>COMPLETED</span>}
+                        </h4>
                         <ul>
-                            {step.tasks.map((task, i) => (<li key={i}>{task}</li>))}
+                            {step.tasks.map((task, i) => (
+                                <li key={i}>{task}</li>
+                            ))}
                         </ul>
                     </div>
-                </li>
-            ))}
-        </ol>
-    );
+                </div>
+            );
+        })}
+    </div>
+);
 
     const renderMain = () => {
         switch (activeNav) {
