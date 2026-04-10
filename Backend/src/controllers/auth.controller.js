@@ -44,14 +44,14 @@ async function registerUserController(req, res) {
         });
 
         // Payload key is 'id'
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         res.cookie('token', token, cookieOptions);
 
         res.status(201).json({
             message: 'User registered successfully',
             user: {
-                id: user.id,
+                id: user._id,
                 username: user.username,
                 email: user.email
             }
@@ -77,14 +77,14 @@ async function loginUserController(req, res) {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         res.cookie('token', token, cookieOptions);
 
         res.status(200).json({
             message: 'User logged in successfully',
             user: {
-                id: user.id,
+                id: user._id,
                 username: user.username,
                 email: user.email
             }
@@ -110,14 +110,14 @@ async function logoutUserController(req, res) {
 async function getMeController(req, res) {
     try {
         // IMPORTANT: Changed from req.user._id to req.user.id to match JWT payload
-        const user = await userModel.findById(req.user.id); 
+        const user = await userModel.findById(req.user._id); 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         res.status(200).json({
             message: 'User details fetched successfully',
             user: {
-                id: user.id,
+                id: user._id,
                 username: user.username,
                 email: user.email
             }
