@@ -110,7 +110,7 @@ async function logoutUserController(req, res) {
 async function getMeController(req, res) {
     try {
         // IMPORTANT: Changed from req.user._id to req.user.id to match JWT payload
-        const user = await userModel.findById(req.user._id); 
+        const user = await userModel.findById(req.user.id); 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
